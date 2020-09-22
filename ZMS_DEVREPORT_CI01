@@ -103,7 +103,9 @@ CLASS lcl_ms_report IMPLEMENTATION.
     DATA it_val TYPE STANDARD TABLE OF zwww_values.
 
     FIELD-SYMBOLS: <ls_val> LIKE LINE OF it_val.
-
+    
+    "Macros for fill table for unload MS doc.
+    "Go to link in readme.txt for more information
     DEFINE set_line.
       APPEND INITIAL LINE TO it_val ASSIGNING <ls_val>.
       <ls_val>-var_name = &1.
