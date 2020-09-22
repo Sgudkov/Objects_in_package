@@ -2,7 +2,7 @@
 *& Include          ZMS_DEVREPORT_CD01
 *&---------------------------------------------------------------------*
 
-CLASS lcl_ms_report DEFINITION INHERITING FROM cx_static_check.
+CLASS lcl_ms_report DEFINITION.
 
   PUBLIC SECTION.
 
