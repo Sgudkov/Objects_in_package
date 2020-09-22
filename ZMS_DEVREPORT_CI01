@@ -6,7 +6,7 @@ CLASS lcl_ms_report IMPLEMENTATION.
 
   METHOD fill_tadir.
 
-    "Основаня выборка + методы
+    "Main query + methods
     SELECT td~*, tm~methodname AS method, tm~classname AS classname
       INTO CORRESPONDING FIELDS OF TABLE @mt_tadir
       FROM tadir AS td
@@ -15,7 +15,7 @@ CLASS lcl_ms_report IMPLEMENTATION.
       WHERE td~devclass = @p_pack
       AND td~delflag = @abap_false.
     IF sy-subrc <> 0.
-      MESSAGE 'Указанного пакета не существует' TYPE 'S' DISPLAY LIKE 'E'.
+      MESSAGE 'Current package is not defined' TYPE 'S' DISPLAY LIKE 'E'.
       mv_check = abap_true.
     ENDIF.
 
@@ -24,7 +24,7 @@ CLASS lcl_ms_report IMPLEMENTATION.
       <ls_tadir>-object = 'METH'.
     ENDLOOP.
 
-    "ФМы
+    "Function moduls
     SELECT
         en~funcname  AS obj_name,
        'FUNC' AS object,
@@ -37,12 +37,12 @@ CLASS lcl_ms_report IMPLEMENTATION.
       WHERE en~generated = @space
        APPENDING CORRESPONDING FIELDS OF TABLE @mt_tadir.
 
-    "Модули ГФ
+    "Function groups
     SELECT
         tf~pname  AS obj_name,
        'REPS' AS object,
         mt~devclass,
-        'Источник отчета' AS name
+        'Report' AS name
       FROM enlfdir AS en
       JOIN @mt_tadir AS mt
         ON mt~obj_name = en~area
@@ -119,7 +119,7 @@ CLASS lcl_ms_report IMPLEMENTATION.
 
     DATA(lt_req_tab) = get_req_table( ).
 
-    " Заполнения заголовка
+    " Fill header
     set_line '' 0 '[report_title]'  '' p_name.
     set_line '' 0 '[group_title]'   '' p_pack+6(3).
     set_line '' 0 '[package_title]' '' p_pack.
@@ -129,7 +129,7 @@ CLASS lcl_ms_report IMPLEMENTATION.
     SORT mt_object  BY object.
     SORT mt_struct  BY object.
 
-    " Заполнения таблицы запросов
+    " Fill transport's requests table
     LOOP AT lt_req_tab ASSIGNING FIELD-SYMBOL(<ls_line>).
       DATA(lv_tabix_req) = sy-tabix.
       set_line 'request_table' lv_tabix_req '[num]'             '' lv_tabix_req.
@@ -140,7 +140,7 @@ CLASS lcl_ms_report IMPLEMENTATION.
       set_line 'request_table' lv_tabix_req '[req_description]' '' <ls_line>-as4text.
     ENDLOOP.
 
-    " Заполнение объектов классы, ФМ и т.д.
+    " Fill classes, objects etc
     LOOP AT mt_object ASSIGNING FIELD-SYMBOL(<ls_program>).
       DATA(lv_tabix) = sy-tabix.
       DATA(lv_objname) = COND #(
@@ -151,18 +151,18 @@ CLASS lcl_ms_report IMPLEMENTATION.
       set_line 'program_object_t' lv_tabix '[object_type]' '' <ls_program>-object.
       set_line 'program_object_t' lv_tabix '[name_obj]'    '' lv_objname.
       set_line 'program_object_t' lv_tabix '[package]'     '' <ls_program>-devclass.
-      set_line 'program_object_t' lv_tabix '[status]'      '' 'Новый'.
+      set_line 'program_object_t' lv_tabix '[status]'      '' 'NEW'.
       set_line 'program_object_t' lv_tabix '[description]' '' <ls_program>-name.
     ENDLOOP.
 
-    " Заполнение объектов таблицы, ЭД и т.д.
+    " Fill data elemetns, table types etc
     LOOP AT mt_struct ASSIGNING FIELD-SYMBOL(<ls_struct>).
       DATA(lv_tabix_str) = sy-tabix.
       set_line 'tables_object_t' lv_tabix_str '[num]'         '' lv_tabix_str.
       set_line 'tables_object_t' lv_tabix_str '[object_type]' '' <ls_struct>-object.
       set_line 'tables_object_t' lv_tabix_str '[name_obj]'    '' <ls_struct>-obj_name.
       set_line 'tables_object_t' lv_tabix_str '[package]'     '' <ls_struct>-devclass.
-      set_line 'tables_object_t' lv_tabix_str '[status]'      '' 'Новый'.
+      set_line 'tables_object_t' lv_tabix_str '[status]'      '' 'NEW'.
       set_line 'tables_object_t' lv_tabix_str '[description]' '' <ls_struct>-name.
     ENDLOOP.
 
@@ -206,7 +206,7 @@ CLASS lcl_ms_report IMPLEMENTATION.
 
     IF sy-subrc = 0.
 
-      "запросы, которые включают объекты из других пакетов
+      "Transport requests from another packages
       SELECT DISTINCT e071~trkorr
         FROM e071
         JOIN tadir ON tadir~object = e071~object
@@ -273,7 +273,7 @@ CLASS lcl_ms_report IMPLEMENTATION.
         printcancel = 1
         OTHERS      = 2.
     IF sy-subrc <> 0.
-      WRITE 'Упс! что-то пошло не так'.
+      WRITE 'Oops, something going wrong!'.
     ENDIF.
   ENDMETHOD.
 
